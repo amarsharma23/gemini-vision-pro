@@ -43,7 +43,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def get_gemini_response(input_text, image, prompt):
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-pro-vision')
     response = model.generate_content([input_text, image[0], prompt])
     return response.text
 
