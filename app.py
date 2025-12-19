@@ -7,7 +7,8 @@ from google.genai import types
 
 # Load environment variables and configure API
 load_dotenv()
-client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+api_key = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
+client = genai.Client(api_key=api_key)
 
 # Page configuration with custom theme
 st.set_page_config(
@@ -46,7 +47,7 @@ def get_gemini_response(input, image, prompt):
         model='gemini-2.0-flash-exp',
         contents=[input, image, prompt]
     )
-    return response.text
+    return response.text if hasattr(response, 'text') else str(response)
 
 def input_image_setup(uploaded_file):
     if uploaded_file is not None:
