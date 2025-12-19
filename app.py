@@ -2,13 +2,13 @@ import streamlit as st
 from dotenv import load_dotenv
 import os
 from PIL import Image
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 
 # Load environment variables and configure API
 load_dotenv()
-api_key = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
-client = genai.Client(api_key=api_key)
+api_key = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY", "")
+if api_key:
+    genai.configure(api_key=api_key)
 
 # Page configuration with custom theme
 st.set_page_config(
@@ -42,21 +42,19 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-def get_gemini_response(input, image, prompt):
-    response = client.models.generate_content(
-        model='gemini-2.0-flash-exp',
-        contents=[input, image, prompt]
-    )
-    return response.text if hasattr(response, 'text') else str(response)
+def get_gemini_response(input_text, image, prompt):
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    response = model.generate_content([input_text, image[0], prompt])
+    return response.text
 
 def input_image_setup(uploaded_file):
     if uploaded_file is not None:
         bytes_data = uploaded_file.getvalue()
-        image_part = types.Part.from_bytes(
-            data=bytes_data,
-            mime_type=uploaded_file.type
-        )
-        return image_part
+        image_parts = [{
+            "mime_type": uploaded_file.type,
+            "data": bytes_data
+        }]
+        return image_parts
     raise FileNotFoundError("No file uploaded")
 
 # Sidebar with enhanced styling
